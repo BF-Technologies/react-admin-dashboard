@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Box, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
@@ -6,9 +6,10 @@ import { mockDataTeam } from "../../data/mockData";
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
 import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
+import PlayCircleOutlineOutlinedIcon from '@mui/icons-material/PlayCircleOutlineOutlined';
 import Header from "../../components/Header";
 
-const Team = () => {
+const Streams = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const columns = [
@@ -20,58 +21,50 @@ const Team = () => {
       cellClassName: "name-column--cell",
     },
     {
-      field: "age",
-      headerName: "Age",
-      type: "number",
+      field: "url",
+      headerName: "Url",
       headerAlign: "left",
       align: "left",
     },
     {
-      field: "phone",
-      headerName: "Phone Number",
+      field: "streamType",
+      headerName: "Stream Type",
       flex: 1,
     },
     {
-      field: "email",
-      headerName: "Email",
-      flex: 1,
-    },
-    {
-      field: "accessLevel",
-      headerName: "Access Level",
+      field: "liveView",
+      headerName: "Live View",
       flex: 1,
       renderCell: ({ row: { access } }) => {
         return (
-          <Box
-            width="60%"
-            m="0 auto"
-            p="5px"
-            display="flex"
-            justifyContent="center"
-            backgroundColor={
-              access === "admin"
-                ? colors.greenAccent[600]
-                : access === "manager"
-                ? colors.greenAccent[700]
-                : colors.greenAccent[700]
-            }
-            borderRadius="4px"
-          >
-            {access === "admin" && <AdminPanelSettingsOutlinedIcon />}
-            {access === "manager" && <SecurityOutlinedIcon />}
-            {access === "user" && <LockOpenOutlinedIcon />}
-            <Typography color={colors.grey[100]} sx={{ ml: "5px" }}>
-              {access}
+          <div onClick={() => {
+            fetch(`https://localhost:8888/getStreamUrlById/1`)
+              .then(response => response.json())
+              .then(data => {
+                console.log(data);
+              });
+          }}>
+            <PlayCircleOutlineOutlinedIcon />
+            <Typography variant="body1" color="textSecondary">
+              {access ? "Live" : "Not Live"}
             </Typography>
-          </Box>
+          </div>
         );
       },
     },
   ];
 
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:8888/getStreams")
+      .then(response => response.json())
+      .then(data => setData(data));
+  }, []);
+
   return (
     <Box m="20px">
-      <Header title="TEAM" subtitle="Managing the Team Members" />
+      <Header title="Stream" subtitle="Managing the Team Members" />
       <Box
         m="40px 0 0 0"
         height="75vh"
@@ -101,10 +94,9 @@ const Team = () => {
           },
         }}
       >
-        <DataGrid checkboxSelection rows={mockDataTeam} columns={columns} />
+        <DataGrid checkboxSelection rows={data} columns={columns} />
       </Box>
     </Box>
   );
 };
-
-export default Team;
+export default Streams;

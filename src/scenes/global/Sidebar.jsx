@@ -135,7 +135,7 @@ const Sidebar = () => {
   </Typography>
   <Item
     title="List Media Streams"
-    to="/media-streams"
+    to="/streams"
     icon={<ReceiptOutlinedIcon />}
     selected={selected}
     setSelected={setSelected}

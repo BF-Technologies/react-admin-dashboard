@@ -150,7 +150,7 @@ const Dashboard = () => {
                 fontWeight="bold"
                 color={colors.greenAccent[500]}
               >
-                $59,342.32
+                $1,000,000.0
               </Typography>
             </Box>
             <Box>
