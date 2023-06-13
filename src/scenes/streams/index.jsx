@@ -1,66 +1,75 @@
-import { useState, useEffect } from "react";
-import { Box, Typography, useTheme } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Box, Typography, useTheme, Modal } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
+import axios from "axios";
 import { mockDataTeam } from "../../data/mockData";
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
 import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
-import PlayCircleOutlineOutlinedIcon from '@mui/icons-material/PlayCircleOutlineOutlined';
+import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import Header from "../../components/Header";
+import Player from "../player";
+import "../../index.css"
+
 
 const Streams = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const [data, setData] = useState([]);
+  const [selectedUrl, setSelectedUrl] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    axios.get("http://localhost:8090/media-streams").then((response) => {
+      const data = response.data;
+      setData(data);
+    });
+  }, []);
+
+  const handlePlayClick = (event, url) => {
+    setSelectedUrl(url);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedUrl("");
+    setIsModalOpen(false);
+  };
+
   const columns = [
-    { field: "id", headerName: "ID" },
+    { field: "id", headerName: "id" },
     {
       field: "name",
-      headerName: "Name",
+      headerName: "name",
       flex: 1,
       cellClassName: "name-column--cell",
     },
     {
       field: "url",
-      headerName: "Url",
+      headerName: "url",
       headerAlign: "left",
       align: "left",
+      flex: 1,
+      cellClassName: "url-column--cell",
     },
     {
-      field: "streamType",
+      field: "type",
       headerName: "Stream Type",
       flex: 1,
     },
     {
-      field: "liveView",
-      headerName: "Live View",
+      field: "play",
+      headerName: "Play",
       flex: 1,
-      renderCell: ({ row: { access } }) => {
-        return (
-          <div onClick={() => {
-            fetch(`https://localhost:8888/getStreamUrlById/1`)
-              .then(response => response.json())
-              .then(data => {
-                console.log(data);
-              });
-          }}>
-            <PlayCircleOutlineOutlinedIcon />
-            <Typography variant="body1" color="textSecondary">
-              {access ? "Live" : "Not Live"}
-            </Typography>
-          </div>
-        );
-      },
+      cellClassName: "play-column--cell",
+      renderCell: (params) => (
+        <PlayCircleOutlineOutlinedIcon
+          onClick={(event) => handlePlayClick(event, params.row.url)}
+        />
+      ),
     },
   ];
-
-  const [data, setData] = useState([]);
-
-  useEffect(() => {
-    fetch("http://localhost:8888/getStreams")
-      .then(response => response.json())
-      .then(data => setData(data));
-  }, []);
 
   return (
     <Box m="20px">
@@ -90,13 +99,30 @@ const Streams = () => {
             backgroundColor: colors.blueAccent[700],
           },
           "& .MuiCheckbox-root": {
-            color: `${colors.greenAccent[200]} !important`,
+            display: "none", // Remove checkbox
           },
         }}
       >
-        <DataGrid checkboxSelection rows={data} columns={columns} />
+        <DataGrid rows={data} columns={columns} />
       </Box>
+      <Modal open={isModalOpen} onClose={handleCloseModal}>
+        <Box
+          className="fullscreen-modal"
+          sx={{
+            position: "absolute",
+            top: "0",
+            left: "0",
+            width: "100%",
+            height: "100%",
+            backgroundColor: "white",
+            border: "1px solid black",
+          }}
+        >
+          <Player />
+        </Box>
+      </Modal>
     </Box>
   );
 };
+
 export default Streams;
