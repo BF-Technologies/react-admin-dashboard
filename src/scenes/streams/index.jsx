@@ -28,7 +28,15 @@ const Streams = () => {
   }, []);
 
   const handlePlayClick = (event, url) => {
-    setSelectedUrl(url);
+    const response = axios.post('http://localhost:8080/start', {
+      streamUrl: url,
+    }).then((response) => {
+      console.log(data)
+      const data = response.data;
+      
+      setSelectedUrl(data);
+    });
+    console.log("!!!!!!!!!!!!: "+ selectedUrl)
     setIsModalOpen(true);
   };
 
@@ -118,7 +126,9 @@ const Streams = () => {
             border: "1px solid black",
           }}
         >
-          <Player />
+          <div>
+            <Player wsUrl={selectedUrl} />
+          </div>
         </Box>
       </Modal>
     </Box>
